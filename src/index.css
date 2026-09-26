@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --macos-blue: #0a84ff;
+    --macos-blue-hover: #0071e3;
+    --macos-blue-glow: rgba(10, 132, 255, 0.35);
+    --macos-dark-bg: #0d0d0f;
+    --macos-dark-surface: #1c1c1e;
+    --macos-text-primary: #f5f5f7;
+    --macos-text-secondary: #a1a1a6;
+    --macos-text-tertiary: #636366;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, system-ui, sans-serif;
+    color: var(--macos-text-primary);
+    background-color: var(--macos-dark-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}
+
+/* macOS Dark Glassmorphism */
+.macos-glass {
+  background: rgba(28, 28, 30, 0.65);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.macos-glass-card {
+  background: rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+.macos-glass-card:hover {
+  background: rgba(255, 255, 255, 0.075);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 40px -4px rgba(0, 0, 0, 0.6), 0 0 24px rgba(10, 132, 255, 0.08);
+}
+
+.macos-glass-modal {
+  background: rgba(24, 24, 28, 0.88);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.macos-glass-nav {
+  background: rgba(20, 20, 24, 0.75);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.macos-glass-pill {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Admin: light-blue, transparent Pterodactyl-inspired iOS workspace */
+.ptero-admin {
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 0%, #d8f3ff 0, transparent 32%), linear-gradient(135deg, #effaff 0%, #ddecf8 48%, #f7fbff 100%);
+  color: #173b58;
+}
+.ptero-topbar {
+  display: flex;
+  height: 70px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 36px;
+  background: rgba(255,255,255,.72);
+  border-bottom: 1px solid rgba(86,157,196,.22);
+  box-shadow: 0 8px 26px rgba(48,108,143,.08);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+.ptero-admin main > section { background: rgba(245,252,255,.55) !important; box-shadow: 0 18px 48px rgba(58,119,157,.18) !important; }
+.ptero-admin main > section > div { background: rgba(255,255,255,.52) !important; color: #173b58 !important; }
+.ptero-admin [class*="bg-[#190033]"],
+.ptero-admin [class*="bg-[#25004c]"],
+.ptero-admin [class*="bg-[#120026]"],
+.ptero-admin [class*="bg-[#0d1519]"] { background: rgba(255,255,255,.65) !important; color: #173b58 !important; border-color: rgba(86,157,196,.22) !important; }
+.ptero-admin [class*="bg-black"], .ptero-admin [class*="bg-white/5"] { background: rgba(230,246,255,.7) !important; }
+.ptero-admin [class*="text-white"] { color: #173b58 !important; }
+.ptero-admin [class*="text-violet"] { color: #5b7890 !important; }
+.ptero-admin [class*="bg-gradient-to-r"], .ptero-admin [class*="bg-gradient-to-br"] { background: linear-gradient(135deg, #38bdf8, #0a84ff) !important; color: white !important; }
+.ptero-admin input { color: #173b58; }
+
+/* macOS Vivid Blue Gradient Button */
+.macos-btn-gradient {
+  background: linear-gradient(135deg, #0a84ff 0%, #0071e3 60%, #38bdf8 100%);
+  box-shadow: 0 4px 16px 0 rgba(10, 132, 255, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.macos-btn-gradient:hover {
+  background: linear-gradient(135deg, #2b95ff 0%, #0a84ff 60%, #60a5fa 100%);
+  box-shadow: 0 6px 24px 0 rgba(10, 132, 255, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Custom dark scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* Print optimizations */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

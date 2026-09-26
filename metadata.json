@@ -1,0 +1,6 @@
+{
+  "name": "IIoT Laboratory Record",
+  "description": "A formal digital laboratory record and management portal for Industrial IoT experiments with printable lab sheets and structured data.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
