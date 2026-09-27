@@ -7,6 +7,7 @@ export const SECTION_5_EXPERIMENTS: Experiment[] = [
     title: 'Ultrasonic Water Level Web Server',
     category: 'Section 5: Web Server Based IoT Projects',
     categoryShort: 'Web Server',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To develop an embedded HTTP web server on NodeMCU ESP8266 that measures liquid level using an HC-SR04 ultrasonic sensor and displays live graphical tank levels on a web browser without internet access.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Dev Board', specs: 'Wi-Fi SoftAP capable SoC', quantity: '1 No.' },
@@ -97,6 +98,7 @@ void loop() {
     title: 'LED Control via Web Page',
     category: 'Section 5: Web Server Based IoT Projects',
     categoryShort: 'Web Server',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To build an embedded HTTP web server on NodeMCU ESP8266 allowing users to toggle external LEDs ON and OFF from any web browser on the local Wi-Fi network.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Board', specs: 'Wi-Fi Station Mode capable', quantity: '1 No.' },
@@ -185,6 +187,7 @@ void loop() {
     title: 'Touchless Attendance System',
     category: 'Section 5: Web Server Based IoT Projects',
     categoryShort: 'Web Server',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To design a Touchless Attendance System using NodeMCU ESP8266, RFID reader, and an embedded web server logging check-in records in real time.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Board', specs: 'Wi-Fi 2.4GHz microcontroller', quantity: '1 No.' },

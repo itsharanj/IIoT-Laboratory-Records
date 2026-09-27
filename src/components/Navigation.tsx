@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Layers, CheckCircle2, Cpu, LifeBuoy, Mail, Phone, X } from 'lucide-react';
+import { Layers, CheckCircle2, Cpu, LifeBuoy, Mail, Phone, X, LogOut, UserRound } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: 'experiments' | 'progress';
@@ -8,6 +8,10 @@ interface NavigationProps {
   completedCount: number;
   totalCount: number;
   onOpenCatalogue?: () => void;
+  studentRegisterNumber: string;
+  studentName: string;
+  studentSupporter?: boolean;
+  onStudentLogout: () => void;
 }
 
 export const Navigation = ({
@@ -16,6 +20,10 @@ export const Navigation = ({
   completedCount,
   totalCount,
   onOpenCatalogue,
+  studentRegisterNumber,
+  studentName,
+  studentSupporter = false,
+  onStudentLogout,
 }: NavigationProps) => {
   const [supportOpen, setSupportOpen] = useState(false);
   return (
@@ -92,6 +100,17 @@ export const Navigation = ({
           </motion.button>
         </div>
 
+        {/* Student greeting */}
+        <div className="hidden lg:flex items-center gap-2 min-w-0">
+          <div className="min-w-0 text-right">
+            <p className="text-[10px] uppercase tracking-[.16em] font-bold text-[#60a5fa]">Welcome back</p>
+            <p className="truncate max-w-44 text-sm font-bold text-white">{studentName} 👋</p>
+          </div>
+          {studentSupporter && (
+            <span className="shrink-0 rounded-full border border-amber-300/30 bg-amber-300/10 px-2.5 py-1 text-[10px] font-black tracking-[.16em] text-amber-200">SUPPORTER</span>
+          )}
+        </div>
+
         {/* Right Status */}
         <div className="hidden md:flex items-center gap-2 text-xs text-[#a1a1a6] relative">
           <button
@@ -112,6 +131,14 @@ export const Navigation = ({
               <a href="mailto:sharanj2008@gmail.com" className="mt-2 flex items-center gap-2 text-sm text-[#f5f5f7] hover:text-[#60a5fa]"><Mail className="w-4 h-4 text-[#60a5fa]" /> sharanj2008@gmail.com</a>
             </div>
           )}
+          <div className="hidden sm:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">
+            <UserRound className="w-3.5 h-3.5 text-[#60a5fa]" />
+            <span className="text-[11px] font-mono font-semibold text-[#d1d1d6]">{studentRegisterNumber}</span>
+            <button type="button" onClick={onStudentLogout} title="Student logout" className="ml-1 rounded-full p-1 text-[#a1a1a6] hover:bg-white/10 hover:text-white transition">
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           <button
             type="button"
             onClick={onOpenCatalogue}

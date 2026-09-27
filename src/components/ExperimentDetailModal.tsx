@@ -138,9 +138,37 @@ export const ExperimentDetailModal = ({
   const tutorialUrl = uploadedTutorialUrl || experiment.tutorialVideoUrl;
   const hasTutorialVideo = Boolean(tutorialUrl && tutorialUrl.trim().length > 0);
   const hasCode = Boolean(!isPacketTracer && experiment.code && experiment.code.trim().length > 0);
-  const hasPhotos = availablePhotos.length > 0;
-  const currentPhoto = hasPhotos ? availablePhotos[activePhotoIndex] : null;
-  const modalPhotos = [...getExperimentPhotoItems(experiment, availablePhotos), ...uploadedMedia.filter(item => item.media_type === 'image').map(item => ({ title: item.title, image: item.url, downloadUrl: item.url, description: 'Uploaded by administrator', category: 'Lab Upload' }))];
+  const settings = {
+    showHardwarePhoto: true,
+    showSerialMonitor: true,
+    showThingSpeakDashboard: true,
+    showOutputPhoto: true,
+    ...(experiment.settings ?? {}),
+  };
+  const visibleLocalPhotos = settings.showHardwarePhoto ? availablePhotos : [];
+  const isUploadedPhotoVisible = (title: string) => {
+    const normalized = title.toLowerCase();
+    if (normalized.includes('hardware')) return settings.showHardwarePhoto;
+    if (normalized.includes('serial')) return settings.showSerialMonitor;
+    if (normalized.includes('thingspeak')) return settings.showThingSpeakDashboard;
+    if (normalized.includes('output') || normalized.includes('simulation')) return settings.showOutputPhoto;
+    return true;
+  };
+  const visibleUploadedImages = uploadedMedia.filter(
+    item => item.media_type === 'image' && isUploadedPhotoVisible(item.title),
+  );
+  const hasPhotos = visibleLocalPhotos.length > 0 || visibleUploadedImages.length > 0;
+  const currentPhoto = visibleLocalPhotos.length > 0 ? visibleLocalPhotos[Math.min(activePhotoIndex, visibleLocalPhotos.length - 1)] : null;
+  const modalPhotos = [
+    ...getExperimentPhotoItems(experiment, visibleLocalPhotos),
+    ...visibleUploadedImages.map(item => ({
+      title: item.title,
+      image: item.url,
+      downloadUrl: item.url,
+      description: 'Uploaded by administrator',
+      category: 'Lab Upload',
+    })),
+  ];
 
   const handleDownloadPDF = async () => {
     try {
@@ -635,6 +663,7 @@ export const ExperimentDetailModal = ({
         expNo={experiment.expNo}
         category={experiment.category}
         photos={modalPhotos}
+        settings={settings}
       />
 
       <AnimatePresence>

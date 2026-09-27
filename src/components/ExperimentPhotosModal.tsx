@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { PhotoItem } from '../types/experiment';
+import { ExperimentSettings, PhotoItem } from '../types/experiment';
 import { ImageLightboxModal } from './ImageLightboxModal';
 import { downloadPhotoFile } from '../utils/pdfExport';
 import {
@@ -22,6 +22,7 @@ interface ExperimentPhotosModalProps {
   expNo: number;
   category?: string;
   photos?: PhotoItem[];
+  settings?: ExperimentSettings;
 }
 
 interface AttachmentCategoryConfig {
@@ -38,6 +39,7 @@ export const ExperimentPhotosModal = ({
   expNo,
   category = '',
   photos = [],
+  settings: experimentSettings,
 }: ExperimentPhotosModalProps) => {
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [previewImageTitle, setPreviewImageTitle] = useState<string>('');
@@ -75,15 +77,14 @@ export const ExperimentPhotosModal = ({
       experimentTitle.toLowerCase().includes('thingspeak') ||
       (expNo >= 11 && expNo <= 16));
 
-  // A few experiments deliberately omit physical hardware pictures. Their
-  // remaining attachments are still available to students and administrators.
-  const hideHardwarePic = [11, 12, 13].includes(expNo);
-  const needsSerialMonitorPic = [6, 7, 8, 9].includes(expNo);
-
-  // Category definitions:
-  // - Cisco Packet Tracer: exactly "Software Pic"
-  // - ThingSpeak: hardware (where applicable), dashboard (except Exp 11), serial monitor
-  // - Selected basic sensor experiments: hardware plus serial monitor
+  // Evidence slots are controlled by the experiment requirements.
+  // ThingSpeak experiments 11–16 always expose all three requested evidence slots.
+  // Basic sensor experiments expose hardware + serial only where requested; Flame Sensor (08)
+  // intentionally has no Serial Monitor photo slot.
+  const needsSerialMonitorPic = [4, 6, 7, 9].includes(expNo);
+  const showHardwarePhoto = experimentSettings?.showHardwarePhoto !== false;
+  const showSerialMonitor = experimentSettings?.showSerialMonitor !== false;
+  const showThingSpeakDashboard = experimentSettings?.showThingSpeakDashboard !== false;
   const attachmentCategories: AttachmentCategoryConfig[] = isPacketTracer
     ? [
         {
@@ -95,19 +96,21 @@ export const ExperimentPhotosModal = ({
       ]
     : isThingSpeak
     ? [
-        ...(!hideHardwarePic
+        ...(showHardwarePhoto
           ? [{ id: 'hardware' as const, label: 'Hardware Pic', description: 'Physical breadboard circuit & sensor wiring setup', icon: Camera }]
           : []),
-        ...(expNo !== 11
+        ...(showThingSpeakDashboard
           ? [{ id: 'dashboard' as const, label: 'ThingSpeak Dashboard', description: 'Cloud channel telemetry widgets & live charts', icon: LayoutDashboard }]
           : []),
-        { id: 'serial_monitor', label: 'ThingSpeak Serial Monitor', description: 'Serial monitor output log & Wi-Fi transmission telemetry', icon: Terminal },
+        ...(showSerialMonitor
+          ? [{ id: 'serial_monitor' as const, label: 'ThingSpeak Serial Monitor', description: 'Serial monitor output log & Wi-Fi transmission telemetry', icon: Terminal }]
+          : []),
       ]
     : [
-        ...(!hideHardwarePic
+        ...(showHardwarePhoto
           ? [{ id: 'hardware' as const, label: 'Hardware Pic', description: 'Physical breadboard circuit & hardware wiring setup', icon: Camera }]
           : []),
-        ...(needsSerialMonitorPic
+        ...(needsSerialMonitorPic && showSerialMonitor
           ? [{ id: 'serial_monitor' as const, label: 'Serial Monitor Pic', description: 'Arduino Serial Monitor output screenshot', icon: Terminal }]
           : []),
       ];

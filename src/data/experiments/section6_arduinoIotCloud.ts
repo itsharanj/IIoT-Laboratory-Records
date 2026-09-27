@@ -7,6 +7,7 @@ export const SECTION_6_EXPERIMENTS: Experiment[] = [
     title: 'Smart Home using Arduino IoT Cloud',
     category: 'Section 6: Arduino IoT Cloud & Voice Assistant Integration',
     categoryShort: 'Arduino Cloud & Voice',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To design and deploy a Smart Home automation system using NodeMCU ESP8266 connected to Arduino IoT Cloud with bidirectional cloud variables for appliance switching.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Board', specs: 'Wi-Fi enabled 32-bit SoC', quantity: '1 No.' },
@@ -70,6 +71,7 @@ void onLightSwitchChange() {
     title: 'Alexa Voice-Controlled Home Automation',
     category: 'Section 6: Arduino IoT Cloud & Voice Assistant Integration',
     categoryShort: 'Arduino Cloud & Voice',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To integrate NodeMCU ESP8266 with Amazon Alexa voice assistant using fauxmoESP / Arduino IoT Cloud for voice-activated home automation appliance control.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Board', specs: 'Wi-Fi 2.4GHz SoC', quantity: '1 No.' },

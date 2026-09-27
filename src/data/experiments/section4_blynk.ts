@@ -7,6 +7,7 @@ export const SECTION_4_EXPERIMENTS: Experiment[] = [
     title: 'LED Control using Blynk',
     category: 'Section 4: Blynk IoT Experiments',
     categoryShort: 'Blynk',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To interface an LED with NodeMCU ESP8266 and control its state remotely from a smartphone using the Blynk IoT cloud platform and mobile application dashboard.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Dev Board', specs: 'Wi-Fi 802.11 b/g/n, Tensilica Xtensa', quantity: '1 No.' },
@@ -64,6 +65,7 @@ void loop() {
     title: 'LDR Monitoring using Blynk',
     category: 'Section 4: Blynk IoT Experiments',
     categoryShort: 'Blynk',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To monitor ambient light levels using an LDR sensor and display live intensity values on a Blynk mobile gauge widget.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Board', specs: 'Analog pin A0 (10-bit ADC)', quantity: '1 No.' },
@@ -124,6 +126,7 @@ void loop() {
     title: 'Smart Irrigation using Blynk',
     category: 'Section 4: Blynk IoT Experiments',
     categoryShort: 'Blynk',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To design a Smart Irrigation system using NodeMCU ESP8266, Soil Moisture sensor, and relay-controlled water pump with automated and manual override in Blynk.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Board', specs: 'Wi-Fi enabled SoC', quantity: '1 No.' },
@@ -210,6 +213,7 @@ void loop() {
     title: 'Smart Car Parking using Blynk',
     category: 'Section 4: Blynk IoT Experiments',
     categoryShort: 'Blynk',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To implement an IoT Smart Car Parking system using NodeMCU ESP8266, IR slot sensors, and a servo gate controlled and monitored via Blynk.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Board', specs: 'Wi-Fi 2.4GHz SoC', quantity: '1 No.' },

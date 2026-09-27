@@ -447,6 +447,7 @@ void loop() {
     title: 'GSM SMS Send/Receive',
     category: 'Section 1: Basic GPIO & Sensor Interfacing (Standalone NodeMCU)',
     categoryShort: 'Basic I/O & Sensors',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To interface a SIM800L / SIM900 GSM module with NodeMCU ESP8266 using UART serial AT commands to transmit and receive SMS text messages.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Board', specs: 'Tensilica Xtensa LX106', quantity: '1 No.' },

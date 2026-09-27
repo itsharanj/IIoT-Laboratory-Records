@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 900" preserveAspectRatio="xMidYMax slice">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe7ee"/><stop offset=".55" stop-color="#eef3f6"/><stop offset="1" stop-color="#cbd5dc"/></linearGradient>
+  <linearGradient id="back" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#9eabb5"/><stop offset="1" stop-color="#6f7c86"/></linearGradient>
+  <linearGradient id="front" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#75838d"/><stop offset="1" stop-color="#46535d"/></linearGradient>
+  <filter id="blur"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="1800" height="900" fill="url(#sky)"/>
+<ellipse cx="320" cy="160" rx="240" ry="100" fill="#fff" opacity=".28" filter="url(#blur)"/>
+<path d="M0 610 L250 300 L430 515 L700 170 L1010 545 L1240 270 L1530 600 L1800 330 L1800 900 L0 900Z" fill="url(#back)" opacity=".72"/>
+<path d="M0 710 L310 420 L500 600 L735 285 L980 650 L1245 410 L1450 635 L1700 450 L1800 555 L1800 900 L0 900Z" fill="url(#front)" opacity=".82"/>
+<path d="M310 420 L360 485 L405 505 L500 600 L430 515Z M735 285 L805 390 L855 405 L980 650 L700 480Z M1245 410 L1305 490 L1350 505 L1450 635Z M1700 450 L1760 505 L1800 515 L1800 555Z" fill="#f8fbfd" opacity=".9"/>
+<path d="M0 735 Q430 665 820 755 T1800 710 L1800 900 L0 900Z" fill="#dfe6eb" opacity=".72"/>
+</svg>

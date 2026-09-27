@@ -69,6 +69,7 @@ export const SECTION_3_EXPERIMENTS: Experiment[] = [
     title: 'Pushbutton Controlled LED',
     category: 'Section 3: Cisco Packet Tracer IoT Simulations',
     categoryShort: 'Packet Tracer',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To design and simulate a Pushbutton Controlled LED circuit in Cisco Packet Tracer using an IoT Microcontroller (MCU-PT) with digital input and output routing.',
     apparatus: [
       { slNo: 1, name: 'Cisco Packet Tracer Software', specs: 'Version 8.0 or higher', quantity: '1 Unit' },

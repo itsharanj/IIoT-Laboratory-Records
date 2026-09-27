@@ -57,7 +57,7 @@ void setup() {
 }
 
 void loop() {
-  float temperature = analogRead(A0) * (3.3 / 1023.0) * 100.0;
+  float temperature = analogRead(A0) * 0.32;
 
   Serial.print("Temperature: ");
   Serial.println(temperature);
@@ -112,49 +112,44 @@ B. ThingSpeak Procedure:
       'ThingSpeak Field 2 = Humidity',
     ],
     code: `#include <ESP8266WiFi.h>
+#include <DHT.h>
 #include <ThingSpeak.h>
 
-char ssid[] = "YOUR_WIFI_NAME";
-char pass[] = "YOUR_WIFI_PASSWORD";
+#define D1_PIN D1
 
+const char* ssid = "YOUR_WIFI";
+const char* pass = "YOUR_PASSWORD";
+
+DHT dht(D1_PIN, DHT11);
 WiFiClient client;
 
-unsigned long channel = YOUR_CHANNEL_ID;
-const char* readKey = "YOUR_READ_API_KEY";
+unsigned long channel = 2283807;
+const char* key = "YOUR_API_KEY";
 
 void setup() {
-  Serial.begin(115200);
-
+  Serial.begin(9600);
   WiFi.begin(ssid, pass);
-  while (WiFi.status() != WL_CONNECTED) delay(500);
 
+  while (WiFi.status() != WL_CONNECTED)
+    delay(500);
+
+  dht.begin();
   ThingSpeak.begin(client);
 }
 
 void loop() {
-  float temperature = ThingSpeak.readFloatField(channel, 1, readKey);
+  float t = dht.readTemperature();
+  float h = dht.readHumidity();
 
-  if (ThingSpeak.getLastReadStatus() == 200) {
-    Serial.print("Temperature: ");
-    Serial.println(temperature);
-  } else {
-    Serial.print("Temperature Error: ");
-    Serial.println(ThingSpeak.getLastReadStatus());
-  }
+  Serial.print("Temp: ");
+  Serial.println(t);
+  Serial.print("Humidity: ");
+  Serial.println(h);
 
-  delay(16000);
+  ThingSpeak.writeField(channel, 1, t, key);
+  ThingSpeak.writeField(channel, 2, h, key);
 
-  float humidity = ThingSpeak.readFloatField(channel, 2, readKey);
-
-  if (ThingSpeak.getLastReadStatus() == 200) {
-    Serial.print("Humidity: ");
-    Serial.println(humidity);
-  } else {
-    Serial.print("Humidity Error: ");
-    Serial.println(ThingSpeak.getLastReadStatus());
-  }
-
-  delay(16000);
+  delay(20000);
 }`,
     codeLanguage: 'cpp',
     codeFilename: 'Exp12_ThingSpeak_DHT11.ino',
@@ -340,6 +335,7 @@ void loop() {
     title: 'Colour Sorting via ThingSpeak',
     category: 'Section 2: ThingSpeak Cloud IoT Experiments',
     categoryShort: 'ThingSpeak',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To interface a TCS3200 colour sensor with NodeMCU ESP8266, detect Red, Green, and Blue color frequencies, and record color sorting telemetry to ThingSpeak cloud.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Board', specs: 'GPIO pins D1-D5', quantity: '1 No.' },
@@ -455,6 +451,7 @@ void loop() {
     title: 'ThingSpeak Weather Station',
     category: 'Section 2: ThingSpeak Cloud IoT Experiments',
     categoryShort: 'ThingSpeak',
+    settings: { cautionEnabled: true, cautionMessage: 'This experiment is not done yet. Please verify it by yourself. Once the experiment is completed and verified, the administrator can update this status.' },
     aim: 'To design a multi-sensor IoT weather station with NodeMCU ESP8266 combining temperature, humidity, and light intensity telemetry on ThingSpeak.',
     apparatus: [
       { slNo: 1, name: 'NodeMCU ESP8266 Board', specs: 'Wi-Fi 2.4GHz SoC', quantity: '1 No.' },

@@ -26,6 +26,15 @@ export interface PhotoItem {
   category?: string;
 }
 
+export interface ExperimentSettings {
+  cautionEnabled?: boolean;
+  cautionMessage?: string;
+  showHardwarePhoto?: boolean;
+  showSerialMonitor?: boolean;
+  showThingSpeakDashboard?: boolean;
+  showOutputPhoto?: boolean;
+}
+
 export interface Experiment {
   id: string; // e.g., 'exp-01'
   expNo: number; // e.g., 1
@@ -51,4 +60,5 @@ export interface Experiment {
   conclusion: string;
   softwareComponents?: string[];
   tutorialVideoUrl?: string;
+  settings?: ExperimentSettings;
 }
