@@ -8,8 +8,13 @@ import { AdminUpload } from './components/AdminUpload';
 import { INITIAL_EXPERIMENTS } from './data/experiments';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
 import { getStudentRosterEntry } from './lib/studentProgress';
+import Maintenance404 from './components/Maintenance404';
+
+const MAINTENANCE_MODE = true;
 
 export default function Portal() {
+  if (MAINTENANCE_MODE) return <Maintenance404 />;
+
   const [view, setView] = useState<'home' | 'student' | 'admin'>('home');
   const [studentRegisterNumber, setStudentRegisterNumber] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string>('Student');
