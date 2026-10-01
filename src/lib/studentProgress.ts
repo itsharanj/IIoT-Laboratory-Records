@@ -12,7 +12,17 @@ export interface StudentProgressRecord {
 }
 
 export function normalizeRegisterNumber(value: string) {
-  return value.trim().replace(/\s+/g, ' ').toUpperCase();
+  return value.trim().replace(/\s+/g, '').toUpperCase();
+}
+
+// Karnataka diploma/college register numbers used by this lab follow the
+// established pattern in the roster: 3 digits + 2 letters + 5 digits.
+// This intentionally rejects spaces, hyphens, slashes, dots and other
+// special characters at the student-login boundary.
+export const DIPLOMA_REGISTER_NUMBER_PATTERN = /^\d{3}[A-Z]{2}\d{5}$/;
+
+export function isValidDiplomaRegisterNumber(value: string) {
+  return DIPLOMA_REGISTER_NUMBER_PATTERN.test(normalizeRegisterNumber(value));
 }
 
 
@@ -68,7 +78,7 @@ export function getStudentRosterEntry(registerNumber: string) {
 export async function findStudentByRegisterNumber(registerNumber: string) {
   if (!supabase) throw new Error('Supabase settings are missing.');
   const normalized = normalizeRegisterNumber(registerNumber);
-  if (!normalized || normalized.length < 2 || normalized.length > 50) throw new Error('Please enter a valid register number.');
+  if (!isValidDiplomaRegisterNumber(normalized)) throw new Error('Enter a valid diploma register number (for example, 175EC24046). Special characters are not allowed.');
   const { data, error } = await supabase.from('student_progress').select('register_number, student_name').eq('register_number', normalized).maybeSingle();
   if (error) throw error;
   return data as Pick<StudentProgressRecord, 'register_number' | 'student_name'> | null;
@@ -78,7 +88,7 @@ export async function loginOrCreateStudent(registerNumber: string, studentName: 
   if (!supabase) throw new Error('Supabase settings are missing.');
   const normalized = normalizeRegisterNumber(registerNumber);
   const normalizedName = studentName.trim().replace(/\s+/g, ' ').toUpperCase();
-  if (!normalized || normalized.length < 2 || normalized.length > 50) throw new Error('Please enter a valid register number.');
+  if (!isValidDiplomaRegisterNumber(normalized)) throw new Error('Enter a valid diploma register number (for example, 175EC24046). Special characters are not allowed.');
   if (normalizedName.length < 2 || normalizedName.length > 100) throw new Error('Please enter your full name.');
   const { data, error } = await supabase.from('student_progress').upsert({ register_number: normalized, student_name: normalizedName }, { onConflict: 'register_number' }).select('register_number, student_name, completed_experiment_ids, experiment_status, updated_at').single();
   if (error) throw error;

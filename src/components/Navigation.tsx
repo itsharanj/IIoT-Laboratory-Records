@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Layers, CheckCircle2, Cpu, LifeBuoy, Mail, Phone, X, LogOut, UserRound } from 'lucide-react';
+import { Layers, CheckCircle2, Cpu, LifeBuoy, Mail, Phone, X, LogOut, UserRound, ChevronDown, UserCog } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: 'experiments' | 'progress';
@@ -26,6 +26,7 @@ export const Navigation = ({
   onStudentLogout,
 }: NavigationProps) => {
   const [supportOpen, setSupportOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   return (
     <header className="sticky top-0 z-30 w-full macos-glass-nav transition-all">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -131,12 +132,38 @@ export const Navigation = ({
               <a href="mailto:sharanj2008@gmail.com" className="mt-2 flex items-center gap-2 text-sm text-[#f5f5f7] hover:text-[#60a5fa]"><Mail className="w-4 h-4 text-[#60a5fa]" /> sharanj2008@gmail.com</a>
             </div>
           )}
-          <div className="hidden sm:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">
-            <UserRound className="w-3.5 h-3.5 text-[#60a5fa]" />
-            <span className="text-[11px] font-mono font-semibold text-[#d1d1d6]">{studentRegisterNumber}</span>
-            <button type="button" onClick={onStudentLogout} title="Student logout" className="ml-1 rounded-full p-1 text-[#a1a1a6] hover:bg-white/10 hover:text-white transition">
-              <LogOut className="w-3.5 h-3.5" />
+          <div className="hidden sm:block relative">
+            <button
+              type="button"
+              onClick={() => setProfileOpen((value) => !value)}
+              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 hover:border-[#38bdf8]/30 hover:bg-[#38bdf8]/[0.07] transition"
+              aria-expanded={profileOpen}
+              aria-label="Open student profile"
+            >
+              <UserRound className="w-3.5 h-3.5 text-[#38bdf8]" />
+              <span className="text-[11px] font-mono font-semibold text-[#d1d1d6]">{studentRegisterNumber}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-[#91a7b8] transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
             </button>
+            {profileOpen && (
+              <div className="absolute right-0 top-11 z-50 w-64 rounded-2xl border border-[#38bdf8]/20 bg-[#0a1119]/95 p-4 text-left shadow-2xl backdrop-blur-xl iiot-blue-glow">
+                <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#38bdf8]/10 border border-[#38bdf8]/20 text-[#38bdf8]"><UserCog className="w-5 h-5" /></div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-[.14em] font-bold text-[#38bdf8]">Student profile</p>
+                    <p className="mt-0.5 truncate text-sm font-bold text-white">{studentName}</p>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-2 text-[11px]">
+                  <div className="flex justify-between gap-3"><span className="text-[#71889a]">Register No.</span><span className="font-mono font-semibold text-[#d9f3ff]">{studentRegisterNumber}</span></div>
+                  <div className="flex justify-between gap-3"><span className="text-[#71889a]">Course</span><span className="font-semibold text-[#d9f3ff]">IIoT Laboratory</span></div>
+                  <div className="flex justify-between gap-3"><span className="text-[#71889a]">Progress</span><span className="font-semibold text-[#38bdf8]">{completedCount}/{totalCount}</span></div>
+                </div>
+                <div className="mt-4 h-1.5 overflow-hidden rounded-full iiot-progress-track"><div className="h-full rounded-full iiot-progress-fill" style={{ width: `${totalCount ? Math.round((completedCount / totalCount) * 100) : 0}%` }} /></div>
+                <button type="button" onClick={onStudentLogout} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-[#b7c8d3] hover:border-red-300/20 hover:bg-red-400/10 hover:text-red-200 transition">
+                  <LogOut className="w-3.5 h-3.5" /> Sign out
+                </button>
+              </div>
+            )}
           </div>
 
           <button
@@ -145,7 +172,7 @@ export const Navigation = ({
             title="Open all experiments"
             className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 font-medium text-[#f5f5f7] hover:border-[#0a84ff]/60 hover:bg-[#0a84ff]/10 transition-colors cursor-pointer"
           >
-            <span className="w-2 h-2 rounded-full bg-[#30d158] shadow-sm shadow-emerald-400/60 animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-[#38bdf8] shadow-sm shadow-cyan-300/70 animate-pulse"></span>
             <span>{totalCount} Experiments</span>
           </button>
         </div>

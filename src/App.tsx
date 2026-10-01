@@ -48,6 +48,12 @@ export default function App({ studentRegisterNumber, studentName = 'Student', st
   const [progressSaving, setProgressSaving] = useState(false);
   const [progressError, setProgressError] = useState('');
   const [announcement, setAnnouncement] = useState('');
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowWelcome(false), 3200);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -208,9 +214,33 @@ export default function App({ studentRegisterNumber, studentName = 'Student', st
     <div className="min-h-screen flex flex-col text-[#f5f5f7] relative overflow-hidden bg-[#000000]">
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
         <div className="absolute -top-[15%] -left-[10%] w-[55vw] h-[55vw] rounded-full bg-gradient-to-tr from-[#0a84ff]/16 via-[#1e3a8a]/12 to-transparent blur-[120px]" />
-        <div className="absolute top-[25%] -right-[15%] w-[50vw] h-[50vw] rounded-full bg-gradient-to-br from-[#7c3aed]/12 via-[#312e81]/10 to-transparent blur-[140px]" />
+        <div className="absolute top-[25%] -right-[15%] w-[50vw] h-[50vw] rounded-full bg-gradient-to-br from-[#38bdf8]/12 via-[#0ea5e9]/10 to-transparent blur-[140px]" />
         <div className="absolute -bottom-[20%] left-[15%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-tr from-[#0284c7]/12 via-[#0f172a]/20 to-transparent blur-[130px]" />
       </div>
+
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div
+            className="fixed inset-0 z-[100] pointer-events-none grid place-items-center bg-[#05080d]/70 backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 18, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 240, damping: 24 }}
+              className="rounded-[28px] border border-[#38bdf8]/20 bg-[#08121c]/92 px-10 py-8 text-center shadow-2xl iiot-blue-glow"
+            >
+              <p className="text-[11px] uppercase tracking-[.24em] font-black text-[#38bdf8]">IIoT LABORATORY RECORD</p>
+              <h1 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight text-white">Welcome back, {studentName} 👋</h1>
+              <p className="mt-3 text-sm text-[#91a7b8]">Your practical record is ready.</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <Navigation

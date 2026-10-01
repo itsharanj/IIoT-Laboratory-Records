@@ -1,7 +1,7 @@
 import { FormEvent, useRef, useState } from 'react';
 import { ArrowRight, BookOpen, Check, IdCard, LoaderCircle, UserRound } from 'lucide-react';
 import { motion } from 'motion/react';
-import { findStudentByRegisterNumber, getStudentRosterEntry, loginOrCreateStudent, normalizeRegisterNumber } from '../lib/studentProgress';
+import { findStudentByRegisterNumber, getStudentRosterEntry, isValidDiplomaRegisterNumber, loginOrCreateStudent, normalizeRegisterNumber } from '../lib/studentProgress';
 
 interface StudentLoginProps {
   onSuccess: (registerNumber: string, studentName: string) => void;
@@ -16,7 +16,7 @@ export function StudentLogin({ onSuccess, onBack }: StudentLoginProps) {
   const [loading, setLoading] = useState(false);
   const [buttonOffset, setButtonOffset] = useState({ x: 0, y: 0 });
   const buttonAreaRef = useRef<HTMLDivElement>(null);
-  const validRegisterNumber = registerNumber.trim().length >= 2;
+  const validRegisterNumber = isValidDiplomaRegisterNumber(registerNumber);
   const validName = studentName.trim().length >= 2;
   const ready = validRegisterNumber && (!needsName || validName);
 
@@ -32,7 +32,7 @@ export function StudentLogin({ onSuccess, onBack }: StudentLoginProps) {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!validRegisterNumber || (needsName && !validName)) {
-      setMessage(needsName ? 'Enter your name to finish setting up your student login.' : 'Enter a valid register number to continue.');
+      setMessage(needsName ? 'Enter your name to finish setting up your student login.' : 'Use a valid diploma register number: 3 digits + 2 letters + 5 digits. Special characters are not allowed.');
       return;
     }
     setLoading(true);
@@ -87,7 +87,7 @@ export function StudentLogin({ onSuccess, onBack }: StudentLoginProps) {
               <div className="field-row"><label htmlFor="student-register-number">Register number</label></div>
               <div className={`input-wrap ${validRegisterNumber ? 'valid' : ''}`}>
                 <IdCard size={16} />
-                <input id="student-register-number" type="text" autoComplete="off" spellCheck={false} value={registerNumber} onChange={(e) => { setRegisterNumber(e.target.value.toUpperCase()); setNeedsName(false); setStudentName(''); setMessage(''); }} required />
+                <input id="student-register-number" type="text" autoComplete="off" spellCheck={false} value={registerNumber} onChange={(e) => { setRegisterNumber(e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()); setNeedsName(false); setStudentName(''); setMessage(''); }} required />
                 {validRegisterNumber && <span className="valid-check"><Check size={11} /></span>}
               </div>
             </div>
@@ -105,7 +105,7 @@ export function StudentLogin({ onSuccess, onBack }: StudentLoginProps) {
                 {loading ? <LoaderCircle size={14} className="animate-spin" /> : <>{needsName ? 'Create login' : 'Continue'} <ArrowRight size={14} /></>}
               </button>
             </div>
-            <div className="helper"><span className="helper-dot">●</span>{ready ? <>{needsName ? 'Add your name to finish setting up.' : 'Enter your register number to continue.'} <span className="key">Enter</span></> : 'Enter a valid register number to continue.'}</div>
+            <div className="helper"><span className="helper-dot">●</span>{ready ? <>{needsName ? 'Add your name to finish setting up.' : 'Enter your register number to continue.'} <span className="key">Enter</span></> : 'Use a valid diploma register number: 3 digits + 2 letters + 5 digits. Special characters are not allowed.'}</div>
             {message && <div className="error" role="alert">{message}</div>}
           </form>
 

@@ -44,3 +44,17 @@ The My Progress screen is grouped into: Normal I/O Experiments, ThingSpeak, Cisc
 ## Student roster greeting
 
 The student portal now maps the supplied class register numbers to student names for the header greeting. Register `175EC24017` (CHANDANA NAIKAR R) is specially marked with a `SUPPORTER` badge. Unknown register numbers continue to use the existing auto-create flow and show a generic `Student` greeting.
+
+## 2026-10-01 UI + Security update
+- Product theme is now black + sky blue with restrained cyan glow.
+- Added a student profile popover with register number and live progress.
+- Added a large 3.2-second welcome-back transition after student portal mount.
+- Preserved the existing experiment carousel, record/PDF actions, media system, and semantic completion colors.
+- Security headers and admin/RLS hardening remain documented in `SECURITY.md` and `SECURITY_AUDIT.md`.
+- The current student portal is still register-number based; this is explicitly documented as the main remaining authentication limitation.
+
+## Student login validation
+
+Student register-number login now accepts the established diploma format used by the current roster: `3 digits + 2 uppercase letters + 5 digits` (example: `175EC24046`). Spaces, hyphens, slashes, dots and other special characters are rejected at the login boundary.
+
+Special student accounts that must use email should be configured explicitly rather than inventing an email address. Add the exact register number and exact email mapping before enabling that exception.
