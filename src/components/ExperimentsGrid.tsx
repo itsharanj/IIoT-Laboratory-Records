@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence, Variants } from 'motion/react';
 import { Experiment } from '../types/experiment';
-import { ExperimentCard } from './ExperimentCard';
+import { ExperimentCarousel } from './ExperimentCarousel';
 import { Search, X, SearchX } from 'lucide-react';
 
 interface ExperimentsGridProps {
@@ -270,21 +270,17 @@ export const ExperimentsGrid = ({
           </motion.div>
         ) : (
           <motion.div
-            key={`grid-${selectedSectionId}-${searchQuery}`}
+            key={`carousel-${selectedSectionId}-${searchQuery}`}
             variants={gridContainerVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {filtered.map((exp) => (
-              <ExperimentCard
-                key={exp.id}
-                experiment={exp}
-                onClick={() => onSelectExperiment(exp)}
-                isCompleted={completedIds.has(exp.id)}
-              />
-            ))}
+            <ExperimentCarousel
+              experiments={filtered}
+              onSelectExperiment={onSelectExperiment}
+              completedIds={completedIds}
+            />
           </motion.div>
         )}
       </AnimatePresence>

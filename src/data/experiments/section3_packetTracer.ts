@@ -14,13 +14,28 @@ export const SECTION_3_EXPERIMENTS: Experiment[] = [
       { slNo: 3, name: 'Smart IoT End Devices', specs: 'Smart Light, Smart Door, Smart Fan, Window', quantity: '4 Nos.' },
       { slNo: 4, name: 'User Management Device', specs: 'Tablet / Smartphone with IoT Monitor browser', quantity: '1 Unit' },
     ],
-    procedure: `1. Open Cisco Packet Tracer and place a Wireless Home Gateway on the logical workspace.
-2. Add smart IoT end devices: Smart Light, Smart Door, Smart Fan, and Window onto the canvas.
-3. Configure the wireless adapter on each IoT device to associate with the Home Gateway SSID ("HomeGateway").
-4. Add a Tablet or PC, configure its wireless network to associate with the Home Gateway, and verify DHCP IP allocation.
-5. In the IoT devices' settings, set the IoT Server option to "Home Gateway".
-6. Open the Web Browser on the Tablet, enter the Home Gateway IP address (192.168.25.1), and log in to the IoT Monitor dashboard.
-7. Click the control widgets on the dashboard to remotely toggle the Smart Light, Door, and Fan, verifying bidirectional automated actuation.`,
+    procedure: `1. Open Cisco Packet Tracer
+
+2. Add required components
+Network Device → Wireless Device → Home Gateway
+End Device → Smart Device ( Smart Phone )
+End Device → Home → light, ceiling fan, Window
+
+3. Configuration
+Click Home Gateway → Config → Wireless → Copy the SSID ( Home Gateway )
+Click on Smart Phone → Config → Wireless → Add SSID
+
+Click on other End Devices → Advanced
+i ) Config
+* Change Display if needed
+* IOT Server → Home Gateway
+
+ii ) I/O config → Network Adapter → PT-IOT-NM-1W
+
+4. Connections are made as per the requirement.
+
+5. To control the connected devices
+Click on Smartphone → Desktop → IOT Monitor`,
     images: [],
     code: '',
     output: {
@@ -46,12 +61,31 @@ export const SECTION_3_EXPERIMENTS: Experiment[] = [
       { slNo: 4, name: 'Fire Sprinkler & Alarm Siren', specs: 'Emergency suppression and audible warning actuators', quantity: '1 Set' },
       { slNo: 5, name: 'IoT Home Gateway', specs: 'Network coordinator and registration server', quantity: '1 No.' },
     ],
-    procedure: `1. Launch Cisco Packet Tracer and drag a Smoke Detector, Fire Sprinkler, Siren, and Home Gateway into the workspace.
-2. Connect all IoT devices to the Home Gateway wirelessly or via IoT custom cables.
-3. In each device's configuration panel, set the IoT Server to "Home Gateway".
-4. On the Home Gateway, create an IoT monitoring condition: IF Smoke Detector particulate level > 150 THEN Siren = ON and Sprinkler = ON.
-5. Alt-click the Smoke Detector or drag a smoke particle source near the detector to increase the smoke density.
-6. Verify that the Siren triggers an audible alert and the Fire Sprinkler actuates automatically to disperse water.`,
+    procedure: `1. Open Cisco Packet Tracer
+
+2. Add required components
+Network Device → Wireless Device → Home Gateway
+End Device → Smart Device ( Smart Phone )
+End Device → Home → Smoke Detector , Siren
+End Device → Smart City → Old Car( To produce smoke )
+
+3. Configuration
+Click Home Gateway → Config → Wireless → Copy the SSID ( Home Gateway )
+Click on Smart Phone → Config → Wireless → Add SSID
+
+Click on other End Devices → Advanced
+i ) Config
+* Change Display if needed
+* IOT Server → Home Gateway
+
+ii ) I/O config → Network Adapter → PT-IOT-NM-1W
+
+4. Connections are made as per the requirement.
+
+5. Add a condition to turn ON the Siren using threshold smoke value .
+Click on Smartphone → Desktop → IOT Monitor → Conditions
+
+6. To get smoke , press Alt and click on the old car.`,
     images: [],
     code: '',
     output: {
@@ -110,13 +144,78 @@ export const SECTION_3_EXPERIMENTS: Experiment[] = [
       { slNo: 4, name: 'IoT End Devices', specs: 'Motion sensor, Siren, Light, Door', quantity: '4 Nos.' },
       { slNo: 5, name: 'Cat6 Ethernet Cables', specs: 'Copper straight-through cabling', quantity: '1 Set' },
     ],
-    procedure: `1. Open Cisco Packet Tracer and assemble a network topology consisting of a 2901 Router, 2960 Switch, and a dedicated IoT Registration Server.
-2. Connect the IoT Server and smart devices (Motion Sensor, Siren, Smart Lamp) to switch FastEthernet ports using Cat6 straight-through cables.
-3. Configure static IP addresses or enable DHCP on the router for the IoT subnet (e.g. 192.168.1.0/24).
-4. On the IoT Server, navigate to Services > IoT and turn the service ON.
-5. On each IoT end device, access the Config tab, select Remote Server, and enter the server IP (192.168.1.1) along with user credentials.
-6. Open a PC on the network, navigate to the IoT Server IP via the web browser, and log in to the registration portal.
-7. Verify that all distributed IoT devices are listed and can be monitored and actuated across the network.`,
+    procedure: `Please refer to this video : https://youtu.be/EdYOZbX3r7s?si=R3rZG5glQYLxb8ZS
+
+1 ) Open Cisco Packet Tracer
+
+2) Add required component
+Network device → Switches → 2950 - 24
+Network device → Switches → 2950 - 24
+Network device → Wireless device → WRT300N
+Network device → Wireless device → Cell Tower → Central - Office - Server
+End devices → Home → Ceiling Fan, light, Garage Door
+End devices → Server - PT, Laptop - PT, Smartphone - PT
+
+3 ) Configuration
+ a) Click on Server → Config → Fast Ethernet → IP Configuration → Static
+      Type → IP Address : 192.168.1.2
+ b) Click on Server → Services
+   i) IoT → Registration Service → Service → ON
+   ii) AAA → Service → ON
+        → Network Configuration (to router)
+        → User setup for garage door, mobile, light and ceiling fan
+
+c) Click on WRT300N → Config → Internet → IP configuration → Static
+     Type → IP Address : 192.168.1.3
+
+d) Click on Switch 0 → CLI → Assign the IP Address 192.168.1.1 (Default GW)
+
+e) Click on WRT300N → Internet →IP Config →Static → Default Gateway : 192.168.1.1
+
+f) Click on WRT300N → GUI
+   i) Setup → Internet Connection Type : Automatic Configuration - DHCP
+  ii) Wireless → SSID: Dome
+      wireless security
+    Save settings
+
+g) Click on Other End Devices → Advanced → Config → Wireless0
+  SSID : home
+  Authentication user ID and password
+  → I/O Config → Network Adapter → PT-IoT-NM-4-W
+  → Config → Settings → Server Address : 192.168.1.2
+  Click on Connect
+
+h) Click on Laptop - PT → Config → FastEthernet
+ → IP Config → static
+  Username : 192.168.1.4
+
+Ping the server using Command Prompt
+
+i ) Click on Laptop - PT → Desktop IoT Monitor → Sign up now
+Username : home
+Password : home 123
+Click on create
+
+j ) Click on End Devices → Config → Settings → IoT server
+Username : home
+Password : home 123
+Connect
+
+K ) Now, you can control and devices using Laptop
+
+l ) Click on smartphone - PT → Config → Wireless0 → Authentication → WPA2
+Username : mobile
+Password : mobile123
+
+→ Desktop → IOT Monitor
+IoT Server Address : 192.168.1.2
+Username : home
+Password : home 123
+Click on login
+
+m ) Now, you can control End devices
+
+4 ) Automatic connections are made using IoT custom cable as per the requirement.`,
     images: [],
     code: '',
     output: {

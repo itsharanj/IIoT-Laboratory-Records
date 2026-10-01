@@ -26,6 +26,27 @@ export interface PhotoItem {
   category?: string;
 }
 
+export interface ExperimentContent {
+  title?: string;
+  category?: string;
+  categoryShort?: string;
+  aim?: string;
+  theory?: string;
+  procedure?: string;
+  connections?: string[];
+  conclusion?: string;
+  softwareComponents?: string[];
+  codeLanguage?: string;
+  codeFilename?: string;
+  tutorialVideoUrl?: string;
+  output?: {
+    type?: 'image' | 'video' | 'terminal' | 'waveform';
+    mediaUrl?: string;
+    terminalLog?: string;
+    caption?: string;
+  };
+}
+
 export interface ExperimentSettings {
   cautionEnabled?: boolean;
   cautionMessage?: string;

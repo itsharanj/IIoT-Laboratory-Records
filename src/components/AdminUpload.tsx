@@ -2,13 +2,19 @@ import { ChangeEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   AlertTriangle, Box, Camera, CheckCircle2, ChevronDown, Code2, FileText,
-  FolderOpen, Gauge, ImagePlus, LayoutDashboard, Monitor, Plus, Save,
-  Search, Settings2, ShieldCheck, Terminal, Trash2, UploadCloud, Video,
-  X, Eye, EyeOff, Wrench, Cloud, PanelLeft, Users, Activity, BarChart3, Download, RotateCcw, UserX, Settings, Megaphone, ExternalLink,
+  FolderOpen, ImagePlus, LayoutDashboard, Monitor, Plus, Save,
+  Search, Terminal, Trash2, UploadCloud, Video,
+  X, Eye, EyeOff, Wrench, Cloud, Users, Activity, BarChart3, Download, RotateCcw, UserX, Settings, Megaphone, ExternalLink,
 } from "lucide-react";
-import type { ApparatusItem, Experiment, ExperimentSettings } from "../types/experiment";
+import type { ApparatusItem, Experiment, ExperimentSettings, ExperimentContent } from "../types/experiment";
 import { supabase } from "../lib/supabase";
 import { saveExperimentOverride } from "../lib/experimentOverrides";
+import { AdminLayout } from "./admin/AdminLayout";
+import { AdminSidebar, type NavGroup } from "./admin/AdminSidebar";
+import { AdminTopbar } from "./admin/AdminTopbar";
+import { AdminInspector, type InspectorAction } from "./admin/AdminInspector";
+import { AdminStatCard } from "./admin/AdminStatCard";
+import { AdminQuickAction } from "./admin/AdminQuickAction";
 
 type AssetType = "image" | "image-pdf" | "video" | "pdf";
 type Slot = { key: string; label: string; hint: string; type: AssetType; icon: typeof Camera };
@@ -73,6 +79,19 @@ const pageMeta: Record<Page, { label: string; title: string; icon: typeof Layout
   settings: { label: "Settings", title: "Laboratory settings", icon: Settings },
 };
 
+const navGroups: NavGroup[] = ([
+  { label: "Control", pages: ["overview", "students", "analytics", "activity"] },
+  { label: "Experiment", pages: ["experiment", "code", "components", "media", "gate", "display"] },
+  { label: "System", pages: ["settings"] },
+] as { label: string; pages: Page[] }[]).map((g) => ({ label: g.label, items: g.pages.map((id) => ({ id, label: pageMeta[id].label, icon: pageMeta[id].icon })) }));
+
+const inspectorActions: InspectorAction[] = [
+  { id: "experiment", label: "Open record", icon: FolderOpen },
+  { id: "code", label: "Edit program", icon: Code2 },
+  { id: "media", label: "Manage evidence", icon: ImagePlus },
+  { id: "gate", label: "Card gate", icon: AlertTriangle },
+];
+
 function ConfirmModal({ state, onClose }: { state: ConfirmState; onClose: () => void }) {
   if (!state) return null;
   return (
@@ -92,12 +111,6 @@ function ConfirmModal({ state, onClose }: { state: ConfirmState; onClose: () => 
   );
 }
 
-function PageButton({ page, active, onClick }: { page: Page; active: boolean; onClick: () => void }) {
-  const meta = pageMeta[page];
-  const Icon = meta.icon;
-  return <button onClick={onClick} title={meta.label} className={`admin-dock-item ${active ? "active" : ""}`}><Icon className="h-[18px] w-[18px]" /><span>{meta.label}</span></button>;
-}
-
 export function AdminUpload({ experiments }: { experiments: Experiment[] }) {
   const [experimentId, setExperimentId] = useState(experiments[0]?.id ?? "");
   const [page, setPage] = useState<Page>("overview");
@@ -112,6 +125,7 @@ export function AdminUpload({ experiments }: { experiments: Experiment[] }) {
   const [code, setCode] = useState("");
   const [apparatus, setApparatus] = useState<ApparatusItem[]>([]);
   const [settings, setSettings] = useState<Required<ExperimentSettings>>(defaultSettings);
+  const [content, setContent] = useState<ExperimentContent>({});
   const [savingEditor, setSavingEditor] = useState(false);
   const [confirm, setConfirm] = useState<ConfirmState>(null);
   const [mediaFilter, setMediaFilter] = useState("All media");
@@ -180,6 +194,21 @@ export function AdminUpload({ experiments }: { experiments: Experiment[] }) {
     setCode(chosen.code || "");
     setApparatus(chosen.apparatus || []);
     setSettings({ ...defaultSettings, ...(chosen.settings || {}) });
+    setContent({
+      title: chosen.title,
+      category: chosen.category,
+      categoryShort: chosen.categoryShort,
+      aim: chosen.aim,
+      theory: chosen.theory,
+      procedure: chosen.procedure,
+      connections: chosen.connections ?? [],
+      conclusion: chosen.conclusion,
+      softwareComponents: chosen.softwareComponents ?? [],
+      codeLanguage: chosen.codeLanguage,
+      codeFilename: chosen.codeFilename,
+      tutorialVideoUrl: chosen.tutorialVideoUrl,
+      output: chosen.output ? { ...chosen.output } : undefined,
+    });
     setFiles({});
     setStatus("");
     setMediaFilter("All media");
@@ -233,11 +262,21 @@ export function AdminUpload({ experiments }: { experiments: Experiment[] }) {
   const saveEditorNow = async () => {
     if (!chosen) return;
     setSavingEditor(true); setStatus("");
-    try { await saveExperimentOverride(chosen.id, { code, apparatus, settings }); setStatus("Changes saved successfully."); }
-    catch (error) { setStatus(error instanceof Error ? error.message : "Could not save changes."); }
+    try {
+      await saveExperimentOverride(chosen.id, {
+        code,
+        apparatus,
+        settings,
+        content,
+      });
+      setStatus("All experiment changes saved successfully.");
+    }
+    catch (error) {
+      setStatus(error instanceof Error ? `Save failed: ${error.message}` : "Save failed. Please check Supabase permissions and migration.");
+    }
     finally { setSavingEditor(false); }
   };
-  const requestSave = () => runConfirmed("Save these changes?", "Your edited code, components and student-facing settings will replace the current saved values for this experiment.", () => void saveEditorNow(), { confirmLabel: "Save changes" });
+  const requestSave = () => runConfirmed("Save these changes?", "Your edited title, aim, procedure, theory, result, components, code and student-facing settings will replace the current saved values for this experiment.", () => void saveEditorNow(), { confirmLabel: "Save changes" });
 
   const updateComponent = (index: number, field: keyof ApparatusItem, value: string) => setApparatus((current) => current.map((item, i) => i === index ? { ...item, [field]: value } : item));
   const requestAddComponent = () => runConfirmed("Add component?", "A new component row will be added to this experiment. You will still need to save the experiment.", () => setApparatus((current) => [...current, { slNo: current.length + 1, name: "New Component", specs: "", quantity: "1 No." }]), { confirmLabel: "Add" });
@@ -246,28 +285,10 @@ export function AdminUpload({ experiments }: { experiments: Experiment[] }) {
 
   const nav = (next: Page) => setPage(next);
 
-  const renderHeader = () => (
-    <header className="admin-header">
-      <div className="admin-command-brand">
-        <div className="admin-logo"><ShieldCheck className="h-5 w-5" /></div>
-        <div className="min-w-0"><p className="admin-eyebrow">IIoT Laboratory</p><h1 className="truncate text-[15px] font-semibold text-white">Command Center</h1></div>
-      </div>
-      <div className="admin-command-search">
-        <Search className="h-4 w-4" />
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search experiments, students, actions…" />
-        <kbd>⌘ K</kbd>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="admin-live"><span /> SYSTEM LIVE</span>
-        <button onClick={() => nav("overview")} className="admin-header-btn"><PanelLeft className="h-4 w-4" /> Dashboard</button>
-      </div>
-    </header>
-  );
-
   const renderExperimentPicker = () => (
     <section className="admin-card admin-window-picker relative z-30">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div><p className="admin-kicker">Current experiment</p><h2 className="mt-1 text-base font-semibold text-white">{String(chosen?.expNo ?? 0).padStart(2, "0")} · {chosen?.title}</h2><p className="mt-1 text-xs text-zinc-400">{chosen?.category}</p></div>
+        <div><p className="admin-kicker">Choose experiment</p><h2 className="mt-1 text-base font-semibold text-white">{String(chosen?.expNo ?? 0).padStart(2, "0")} · {chosen?.title}</h2><p className="mt-1 text-xs text-zinc-400">{chosen?.category}</p></div>
         <button onClick={() => setOpen((v) => !v)} className="admin-select"><span>Switch experiment</span><ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} /></button>
       </div>
       <AnimatePresence>
@@ -287,18 +308,57 @@ export function AdminUpload({ experiments }: { experiments: Experiment[] }) {
     { label: "Card caution", value: settings.cautionEnabled ? "ON" : "OFF", icon: AlertTriangle },
   ];
 
+  const quickPages: Page[] = ["students", "analytics", "activity", "experiment", "code", "components", "media", "gate"];
   const renderOverview = () => <div className="space-y-4">
-    <div className="admin-hero"><div><p className="admin-kicker">Administrator workspace</p><h2>Manage the laboratory without touching the source files.</h2><p>Edit one experiment at a time, review evidence, control the student view, and save only after confirmation.</p></div><div className="admin-hero-orb"><Gauge className="h-7 w-7" /></div></div>
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{statCards.map(({ label, value, icon: Icon }) => <div key={label} className="admin-stat"><Icon className="h-4 w-4 text-[#60a5fa]" /><span>{label}</span><strong>{value}</strong></div>)}</div>
-    <div className="grid gap-4 lg:grid-cols-[1.3fr_.7fr]">
-      <div className="admin-card"><div className="flex items-center justify-between"><div><p className="admin-kicker">Quick actions</p><h3 className="admin-section-title">Open a dedicated workspace</h3></div><Settings2 className="h-5 w-5 text-zinc-500" /></div><div className="mt-4 grid gap-2 sm:grid-cols-2">{(["students","analytics","activity","experiment","code","components","media","gate","display","settings"] as Page[]).map((p) => { const M = pageMeta[p]; const Icon = M.icon; return <button key={p} onClick={() => nav(p)} className="admin-action-row"><span className="admin-action-icon"><Icon className="h-4 w-4" /></span><span><b>{M.label}</b><small>{M.title}</small></span><ChevronDown className="ml-auto h-4 w-4 -rotate-90 text-zinc-600" /></button>; })}</div></div>
+    <div className="av7-hero">
+      <p className="admin-kicker">Administrator workspace</p>
+      <h2>Manage the laboratory without touching the source files.</h2>
+      <p className="av7-hero-copy">Edit one experiment at a time, review evidence, control the student view, and save only after confirmation.</p>
+      <div className="av7-hero-actions">
+        <button onClick={() => nav("experiment")} className="admin-primary-btn"><FolderOpen className="h-4 w-4" /> Edit current experiment</button>
+        <button onClick={() => setOpen(true)} className="admin-secondary-btn"><ChevronDown className="h-4 w-4" /> Switch experiment</button>
+      </div>
+    </div>
+    <div className="av7-stat-grid">{statCards.map(({ label, value, icon }, index) => <AdminStatCard key={label} label={label} value={value} icon={icon} index={index} />)}</div>
+    <div className="av7-two-col">
+      <div className="admin-card"><p className="admin-kicker">Quick actions</p><h3 className="admin-section-title">Open a dedicated workspace</h3><div className="av7-quick-grid">{quickPages.map((p) => <AdminQuickAction key={p} label={pageMeta[p].label} description={pageMeta[p].title} icon={pageMeta[p].icon} onClick={() => nav(p)} />)}</div></div>
       <div className="admin-card"><p className="admin-kicker">Safety</p><h3 className="admin-section-title">Every destructive change asks first</h3><p className="mt-3 text-sm leading-6 text-zinc-400">Delete, upload, add/remove, visibility changes and saved edits use a confirmation step. Draft text stays local until you explicitly save it.</p><div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-400/15 bg-emerald-400/[.06] p-3 text-xs text-emerald-300"><CheckCircle2 className="h-4 w-4" /> Protected admin workflow</div></div>
     </div>
   </div>;
 
-  const renderExperiment = () => <div className="space-y-4"><div className="admin-card"><div className="flex items-center gap-3"><div className="admin-icon-box"><FolderOpen className="h-5 w-5" /></div><div><p className="admin-kicker">Experiment record</p><h2 className="admin-section-title">{chosen?.title}</h2></div></div><div className="mt-5 grid gap-3 sm:grid-cols-2"><Info label="Experiment" value={`#${chosen?.expNo}`} /><Info label="Category" value={chosen?.category ?? "—"} /><Info label="Language" value={chosen?.codeLanguage ?? "—"} /><Info label="Code file" value={chosen?.codeFilename ?? "—"} /></div></div><div className="admin-card"><p className="admin-kicker">Student content</p><h3 className="admin-section-title">Aim</h3><p className="mt-3 text-sm leading-7 text-zinc-300">{chosen?.aim}</p><h3 className="admin-section-title mt-6">Conclusion</h3><p className="mt-3 text-sm leading-7 text-zinc-300">{chosen?.conclusion}</p></div></div>;
+  const updateContent = <K extends keyof ExperimentContent>(key: K, value: ExperimentContent[K]) => setContent((current) => ({ ...current, [key]: value }));
 
-  const renderCode = () => <div className="space-y-4"><div className="admin-card"><div className="flex items-center justify-between gap-3"><div><p className="admin-kicker">Program</p><h2 className="admin-section-title">Direct code editor</h2><p className="mt-1 text-xs text-zinc-500">Changes remain draft until you confirm Save changes.</p></div><Code2 className="h-5 w-5 text-[#60a5fa]" /></div><textarea value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false} className="admin-code-editor mt-4" /></div><SaveBar onSave={requestSave} saving={savingEditor} /></div>;
+  const renderExperiment = () => <div className="space-y-4">
+    <div className="admin-card">
+      <div className="flex items-center justify-between gap-3"><div><p className="admin-kicker">Experiment record</p><h2 className="admin-section-title">Full content editor</h2><p className="mt-1 text-xs text-zinc-500">Edit the student-facing title, aim, procedure, theory, result and other record fields.</p></div><FolderOpen className="h-5 w-5 text-[#60a5fa]" /></div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <label><span className="admin-label">Experiment title</span><input value={content.title ?? ""} onChange={(e) => updateContent("title", e.target.value)} className="admin-input mt-2" /></label>
+        <label><span className="admin-label">Category</span><input value={content.category ?? ""} onChange={(e) => updateContent("category", e.target.value)} className="admin-input mt-2" /></label>
+        <label><span className="admin-label">Short category</span><input value={content.categoryShort ?? ""} onChange={(e) => updateContent("categoryShort", e.target.value)} className="admin-input mt-2" /></label>
+        <label><span className="admin-label">Tutorial video URL</span><input value={content.tutorialVideoUrl ?? ""} onChange={(e) => updateContent("tutorialVideoUrl", e.target.value)} className="admin-input mt-2" placeholder="https://..." /></label>
+      </div>
+      <div className="mt-4 grid gap-4">
+        <TextField label="Aim" value={content.aim ?? ""} onChange={(v) => updateContent("aim", v)} />
+        <TextField label="Procedure" value={content.procedure ?? ""} onChange={(v) => updateContent("procedure", v)} rows={8} />
+        <TextField label="Theory / explanation" value={content.theory ?? ""} onChange={(v) => updateContent("theory", v)} rows={6} />
+        <TextField label="Conclusion / Result" value={content.conclusion ?? ""} onChange={(v) => updateContent("conclusion", v)} rows={5} />
+        <TextField label="Connections (one per line)" value={(content.connections ?? []).join("\n")} onChange={(v) => updateContent("connections", v.split("\n").map((x) => x.trim()).filter(Boolean))} rows={5} />
+        <TextField label="Software / required components (one per line)" value={(content.softwareComponents ?? []).join("\n")} onChange={(v) => updateContent("softwareComponents", v.split("\n").map((x) => x.trim()).filter(Boolean))} rows={5} />
+      </div>
+    </div>
+    <div className="admin-card">
+      <div className="flex items-center justify-between gap-3"><div><p className="admin-kicker">Result configuration</p><h3 className="admin-section-title">Student-facing output</h3></div><CheckCircle2 className="h-5 w-5 text-emerald-400" /></div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <label><span className="admin-label">Output type</span><select value={content.output?.type ?? "image"} onChange={(e) => updateContent("output", { ...(content.output ?? {}), type: e.target.value as any })} className="admin-input mt-2"><option value="image">Image</option><option value="video">Video</option><option value="terminal">Terminal</option><option value="waveform">Waveform</option></select></label>
+        <label><span className="admin-label">Output media URL</span><input value={content.output?.mediaUrl ?? ""} onChange={(e) => updateContent("output", { ...(content.output ?? {}), mediaUrl: e.target.value })} className="admin-input mt-2" placeholder="https://..." /></label>
+      </div>
+      <TextField label="Result / output caption" value={content.output?.caption ?? ""} onChange={(v) => updateContent("output", { ...(content.output ?? {}), caption: v })} rows={3} />
+      <TextField label="Terminal output / serial result" value={content.output?.terminalLog ?? ""} onChange={(v) => updateContent("output", { ...(content.output ?? {}), terminalLog: v })} rows={7} />
+    </div>
+    <SaveBar onSave={requestSave} saving={savingEditor} />
+  </div>;
+
+  const renderCode = () => <div className="space-y-4"><div className="admin-card"><div className="flex items-center justify-between gap-3"><div><p className="admin-kicker">Program</p><h2 className="admin-section-title">Direct code editor</h2><p className="mt-1 text-xs text-zinc-500">Edit the complete program and its display metadata.</p></div><Code2 className="h-5 w-5 text-[#60a5fa]" /></div><div className="mt-4 grid gap-3 sm:grid-cols-2"><label><span className="admin-label">Code language</span><input value={content.codeLanguage ?? ""} onChange={(e) => updateContent("codeLanguage", e.target.value)} className="admin-input mt-2" placeholder="Arduino C++" /></label><label><span className="admin-label">Code filename</span><input value={content.codeFilename ?? ""} onChange={(e) => updateContent("codeFilename", e.target.value)} className="admin-input mt-2" placeholder="experiment.ino" /></label></div><textarea value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false} className="admin-code-editor mt-4" /></div><SaveBar onSave={requestSave} saving={savingEditor} /></div>;
 
   const renderComponents = () => <div className="space-y-4"><div className="admin-card"><div className="flex items-center justify-between gap-3"><div><p className="admin-kicker">Hardware</p><h2 className="admin-section-title">Components & apparatus</h2></div><button onClick={requestAddComponent} className="admin-primary-btn"><Plus className="h-4 w-4" /> Add component</button></div><div className="mt-4 space-y-3">{apparatus.map((item, index) => <div key={`${index}-${item.name}`} className="admin-component"><div className="flex items-center justify-between"><span className="text-[10px] font-semibold tracking-[.15em] text-zinc-600">COMPONENT {String(index + 1).padStart(2, "0")}</span><button onClick={() => requestRemoveComponent(index)} className="admin-icon-danger" title="Remove component"><Trash2 className="h-4 w-4" /></button></div><div className="mt-3 grid gap-2 md:grid-cols-[1.4fr_1fr_.5fr]"><input value={item.name} onChange={(e) => updateComponent(index, "name", e.target.value)} placeholder="Component name" className="admin-input" /><input value={item.specs} onChange={(e) => updateComponent(index, "specs", e.target.value)} placeholder="Specifications" className="admin-input" /><input value={item.quantity} onChange={(e) => updateComponent(index, "quantity", e.target.value)} placeholder="Quantity" className="admin-input" /></div></div>)}{!apparatus.length && <EmptyState icon={Box} text="No components configured for this experiment." />}</div></div><SaveBar onSave={requestSave} saving={savingEditor} /></div>;
 
@@ -333,70 +393,29 @@ export function AdminUpload({ experiments }: { experiments: Experiment[] }) {
   ];
   const renderDisplay = () => <div className="space-y-4"><div className="admin-card"><div className="flex items-center gap-3"><div className="admin-icon-box"><Eye className="h-5 w-5" /></div><div><p className="admin-kicker">Student view</p><h2 className="admin-section-title">Photo visibility</h2><p className="mt-1 text-xs text-zinc-500">Each switch controls one student-facing evidence section.</p></div></div><div className="mt-5 grid gap-3 sm:grid-cols-2">{visibilityItems.map((item) => <button key={item.key} onClick={() => requestSettingChange(item.key, !settings[item.key])} className="admin-visibility-row"><span><b>{item.label}</b><small>{item.hint}</small></span>{settings[item.key] ? <Eye className="h-4 w-4 text-emerald-300" /> : <EyeOff className="h-4 w-4 text-zinc-600" />}</button>)}</div></div><SaveBar onSave={requestSave} saving={savingEditor} /></div>;
 
-  const renderInspector = () => (
-    <aside className="admin-inspector">
-      <div className="admin-inspector-head">
-        <div><p className="admin-kicker">Workspace</p><h3>Current experiment</h3></div>
-        <span className="admin-inspector-dot" />
-      </div>
-      <div className="admin-current-experiment">
-        <span className="admin-exp-number">{String(chosen?.expNo ?? 0).padStart(2, "0")}</span>
-        <div className="min-w-0"><b>{chosen?.title ?? "No experiment"}</b><small>{chosen?.category ?? "Select an experiment"}</small></div>
-      </div>
-      <div className="admin-inspector-meta">
-        <Info label="Language" value={chosen?.codeLanguage ?? "—"} />
-        <Info label="Code file" value={chosen?.codeFilename ?? "—"} />
-      </div>
-      <div className="admin-inspector-section">
-        <p className="admin-kicker">Quick actions</p>
-        <button onClick={() => nav("experiment")} className="admin-inspector-action"><FolderOpen className="h-4 w-4" /> Open record <span>→</span></button>
-        <button onClick={() => nav("code")} className="admin-inspector-action"><Code2 className="h-4 w-4" /> Edit program <span>→</span></button>
-        <button onClick={() => nav("media")} className="admin-inspector-action"><ImagePlus className="h-4 w-4" /> Manage evidence <span>→</span></button>
-        <button onClick={() => nav("gate")} className="admin-inspector-action"><AlertTriangle className="h-4 w-4" /> Card gate <span>→</span></button>
-      </div>
-      <div className="admin-inspector-section admin-inspector-status">
-        <p className="admin-kicker">Live status</p>
-        <div><span>Card caution</span><b className={settings.cautionEnabled ? "warn" : "ok"}>{settings.cautionEnabled ? "ENABLED" : "OFF"}</b></div>
-        <div><span>Evidence assets</span><b>{existingMedia.length}</b></div>
-        <div><span>Components</span><b>{apparatus.length}</b></div>
-      </div>
-    </aside>
-  );
 
-  const content: Record<Page, ReactNode> = { overview: renderOverview(), students: renderStudents(), analytics: renderAnalytics(), activity: renderActivity(), experiment: renderExperiment(), code: renderCode(), components: renderComponents(), media: renderMedia(), gate: renderGate(), display: renderDisplay(), settings: renderSettings() };
+  const pageContent: Record<Page, ReactNode> = { overview: renderOverview(), students: renderStudents(), analytics: renderAnalytics(), activity: renderActivity(), experiment: renderExperiment(), code: renderCode(), components: renderComponents(), media: renderMedia(), gate: renderGate(), display: renderDisplay(), settings: renderSettings() };
 
-  return <section className="admin-workspace">
-    {renderHeader()}
-    <div className="admin-body">
-      <aside className="admin-dock">
-        <div className="admin-nav-label">CONTROL</div>
-        {(["overview", "students", "analytics", "activity"] as Page[]).map((p) => <PageButton key={p} page={p} active={page === p} onClick={() => nav(p)} />)}
-        <div className="admin-nav-label workspace-label">EXPERIMENT</div>
-        {(["experiment", "code", "components", "media", "gate", "display"] as Page[]).map((p) => <PageButton key={p} page={p} active={page === p} onClick={() => nav(p)} />)}
-        <div className="admin-nav-label workspace-label">SYSTEM</div>
-        <PageButton page="settings" active={page === "settings"} onClick={() => nav("settings")} />
-      </aside>
-      <main className="admin-main">
-        <div className="admin-page-heading admin-command-page-heading">
-          <div><p className="admin-kicker">{pageMeta[page].label}</p><h2>{pageMeta[page].title}</h2></div>
-          <div className="admin-page-status"><span className={settings.cautionEnabled ? "amber" : "green"}>{settings.cautionEnabled ? "Caution ON" : "Caution OFF"}</span><span>{existingMedia.length} assets</span></div>
-        </div>
-        <div className="admin-workspace-ribbon">
-          <div className="admin-workspace-ribbon-title"><span className="admin-ribbon-dot" /> ADMINISTRATOR WORKSPACE</div>
-          <div className="admin-ribbon-current"><span>Current experiment</span><b>#{String(chosen?.expNo ?? 0).padStart(2, "0")} · {chosen?.title}</b></div>
-          <button onClick={() => setOpen((v) => !v)} className="admin-select"><span>Switch experiment</span><ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} /></button>
-        </div>
-        {open && <div className="admin-command-picker">{renderExperimentPicker()}</div>}
-        {content[page]}
-      </main>
-      {renderInspector()}
+  return <AdminLayout
+    topbar={<AdminTopbar query={query} onQuery={setQuery} onSearchFocus={() => setOpen(true)} onDashboard={() => nav("overview")} />}
+    sidebar={<AdminSidebar groups={navGroups} active={page} onSelect={(id) => nav(id as Page)} />}
+    inspector={<AdminInspector experiment={chosen} cautionEnabled={settings.cautionEnabled} assets={existingMedia.length} components={apparatus.length} actions={inspectorActions} onNavigate={(id) => nav(id as Page)} />}
+    overlay={<>{status && <div className="admin-toast"><CheckCircle2 className="h-4 w-4" />{status}</div>}<ConfirmModal state={confirm} onClose={() => setConfirm(null)} /></>}
+  >
+    <div className="av7-page-heading">
+      <div><p className="admin-kicker">{pageMeta[page].label}</p><h2>{pageMeta[page].title}</h2></div>
+      <div className="av7-heading-actions">
+        <span className={`av7-chip ${settings.cautionEnabled ? "amber" : "green"}`}>{settings.cautionEnabled ? "Caution ON" : "Caution OFF"}</span>
+        <span className="av7-chip">{existingMedia.length} assets</span>
+        <button onClick={() => setOpen((v) => !v)} className="admin-select"><span>Switch experiment</span><ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} /></button>
+      </div>
     </div>
-    {status && <div className="admin-toast"><CheckCircle2 className="h-4 w-4" />{status}</div>}
-    <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
-  </section>;
+    {open && <div className="admin-command-picker">{renderExperimentPicker()}</div>}
+    <motion.div key={page} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}>{pageContent[page]}</motion.div>
+  </AdminLayout>;
 }
 
-function Info({ label, value }: { label: string; value: string }) { return <div className="admin-info"><span>{label}</span><b>{value}</b></div>; }
+function TextField({ label, value, onChange, rows = 4 }: { label: string; value: string; onChange: (value: string) => void; rows?: number }) { return <label className="block"><span className="admin-label">{label}</span><textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows} className="admin-textarea mt-2" /></label>; }
 function SaveBar({ onSave, saving }: { onSave: () => void; saving: boolean }) { return <div className="admin-savebar"><div><b>Unsaved editor changes</b><span>Review them before saving to Supabase.</span></div><button onClick={onSave} disabled={saving} className="admin-primary-btn">{saving ? <span className="admin-spinner" /> : <Save className="h-4 w-4" />}{saving ? "Saving…" : "Save changes"}</button></div>; }
 function EmptyState({ icon: Icon, text }: { icon: typeof Box; text: string }) { return <div className="admin-empty"><Icon className="h-5 w-5" /><span>{text}</span></div>; }
 function UploadCard({ slot, file, onPick, onUpload, uploading }: { slot: Slot; file: File | null | undefined; onPick: (key: string, e: ChangeEvent<HTMLInputElement>) => void; onUpload: (slot: Slot) => void; uploading: string | null }) { const Icon = slot.icon; return <article className="admin-upload-card"><div className="flex items-start gap-3"><span className="admin-icon-box"><Icon className="h-4 w-4" /></span><div className="min-w-0"><b>{slot.label}</b><small>{slot.hint}</small></div></div><label className="admin-file-picker"><span className="truncate">{file?.name ?? "Choose file"}</span><span>Browse</span><input type="file" accept={accept(slot.type)} onChange={(e) => onPick(slot.key, e)} className="hidden" /></label><button disabled={!file || uploading !== null} onClick={() => onUpload(slot)} className="admin-primary-btn w-full justify-center disabled:opacity-40"><UploadCloud className="h-4 w-4" />{uploading === slot.key ? "Uploading…" : "Upload asset"}</button></article>; }

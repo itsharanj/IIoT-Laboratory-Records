@@ -5,6 +5,7 @@ export type ExperimentStatusMap = Record<string, ExperimentStatus>;
 
 export interface StudentProgressRecord {
   register_number: string;
+  student_name: string | null;
   completed_experiment_ids: string[];
   experiment_status?: ExperimentStatusMap;
   updated_at?: string;
@@ -64,11 +65,22 @@ export function getStudentRosterEntry(registerNumber: string) {
   return STUDENT_ROSTER[normalizeRegisterNumber(registerNumber)] ?? null;
 }
 
-export async function loginOrCreateStudent(registerNumber: string) {
+export async function findStudentByRegisterNumber(registerNumber: string) {
   if (!supabase) throw new Error('Supabase settings are missing.');
   const normalized = normalizeRegisterNumber(registerNumber);
   if (!normalized || normalized.length < 2 || normalized.length > 50) throw new Error('Please enter a valid register number.');
-  const { data, error } = await supabase.from('student_progress').upsert({ register_number: normalized }, { onConflict: 'register_number' }).select('register_number, completed_experiment_ids, experiment_status, updated_at').single();
+  const { data, error } = await supabase.from('student_progress').select('register_number, student_name').eq('register_number', normalized).maybeSingle();
+  if (error) throw error;
+  return data as Pick<StudentProgressRecord, 'register_number' | 'student_name'> | null;
+}
+
+export async function loginOrCreateStudent(registerNumber: string, studentName: string) {
+  if (!supabase) throw new Error('Supabase settings are missing.');
+  const normalized = normalizeRegisterNumber(registerNumber);
+  const normalizedName = studentName.trim().replace(/\s+/g, ' ').toUpperCase();
+  if (!normalized || normalized.length < 2 || normalized.length > 50) throw new Error('Please enter a valid register number.');
+  if (normalizedName.length < 2 || normalizedName.length > 100) throw new Error('Please enter your full name.');
+  const { data, error } = await supabase.from('student_progress').upsert({ register_number: normalized, student_name: normalizedName }, { onConflict: 'register_number' }).select('register_number, student_name, completed_experiment_ids, experiment_status, updated_at').single();
   if (error) throw error;
   await logStudentActivity(normalized, 'login');
   return data as StudentProgressRecord;
@@ -77,7 +89,7 @@ export async function loginOrCreateStudent(registerNumber: string) {
 export async function loadStudentProgress(registerNumber: string) {
   if (!supabase) throw new Error('Supabase settings are missing.');
   const normalized = normalizeRegisterNumber(registerNumber);
-  const { data, error } = await supabase.from('student_progress').select('register_number, completed_experiment_ids, experiment_status, updated_at').eq('register_number', normalized).single();
+  const { data, error } = await supabase.from('student_progress').select('register_number, student_name, completed_experiment_ids, experiment_status, updated_at').eq('register_number', normalized).single();
   if (error) throw error;
   return data as StudentProgressRecord;
 }

@@ -21,6 +21,7 @@ create table if not exists public.experiment_overrides (
   code text,
   apparatus jsonb,
   settings jsonb,
+  content jsonb,
   updated_at timestamptz not null default now()
 );
 
@@ -85,10 +86,14 @@ create trigger on_auth_user_created after insert on auth.users for each row exec
 -- Student register-number login and persistent progress
 create table if not exists public.student_progress (
   register_number text primary key,
+  student_name text,
   completed_experiment_ids text[] not null default '{}',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.student_progress
+  add column if not exists student_name text;
 
 alter table public.student_progress enable row level security;
 

@@ -16,10 +16,10 @@ importers:
         version: 2.117.1
       '@tailwindcss/vite':
         specifier: ^4.3.3
-        version: 4.3.3(vite@8.3.1(@types/node@22.20.4)(esbuild@0.25.12)(jiti@2.7.0)(tsx@4.23.15))
+        version: 4.3.3(vite@8.3.1(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
       '@vitejs/plugin-react':
         specifier: ^6.1.1
-        version: 6.1.1(vite@8.3.1(@types/node@22.20.4)(esbuild@0.25.12)(jiti@2.7.0)(tsx@4.23.15))
+        version: 6.1.1(vite@8.3.1(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
       dotenv:
         specifier: ^17.2.3
         version: 17.4.2
@@ -43,7 +43,7 @@ importers:
         version: 19.3.0(react@19.3.0)
       vite:
         specifier: ^8.3.0
-        version: 8.3.1(@types/node@22.20.4)(esbuild@0.25.12)(jiti@2.7.0)(tsx@4.23.15)
+        version: 8.3.1(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)
     devDependencies:
       '@types/express':
         specifier: ^4.17.21
@@ -61,8 +61,8 @@ importers:
         specifier: ^10.4.21
         version: 10.6.1(postcss@8.5.28)
       esbuild:
-        specifier: ^0.25.0
-        version: 0.25.12
+        specifier: ^0.28.2
+        version: 0.28.2
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3

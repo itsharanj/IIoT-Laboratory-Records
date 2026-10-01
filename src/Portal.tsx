@@ -10,7 +10,7 @@ import { isSupabaseConfigured, supabase } from './lib/supabase';
 import { getStudentRosterEntry } from './lib/studentProgress';
 import Maintenance404 from './components/Maintenance404';
 
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 export default function Portal() {
   if (MAINTENANCE_MODE) return <Maintenance404 />;
@@ -22,7 +22,7 @@ export default function Portal() {
   useEffect(() => { if (!supabase) return; supabase.auth.signOut(); const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next)); return () => data.subscription.unsubscribe(); }, []);
   useEffect(() => { if (!session || view !== 'admin' || !supabase) return; setChecking(true); supabase.from('profiles').select('role').eq('id', session.user.id).single().then(({ data, error: queryError }) => { setChecking(false); if (queryError || data?.role !== 'admin') { setError('This email does not have administrator access.'); supabase.auth.signOut(); } }); }, [session, view]);
   if (!isSupabaseConfigured) return <div className="min-h-screen grid place-items-center bg-black text-white">Supabase settings are missing.</div>;
-  if (view === 'student' && !studentRegisterNumber) return <StudentLogin onSuccess={(registerNumber) => { const entry = getStudentRosterEntry(registerNumber); setStudentRegisterNumber(registerNumber); setStudentName(entry?.name ?? 'Student'); setStudentSupporter(Boolean(entry?.supporter)); }} onBack={() => setView('home')} />;
+  if (view === 'student' && !studentRegisterNumber) return <StudentLogin onSuccess={(registerNumber, enteredName) => { const entry = getStudentRosterEntry(registerNumber); setStudentRegisterNumber(registerNumber); setStudentName(enteredName || entry?.name || 'Student'); setStudentSupporter(Boolean(entry?.supporter)); }} onBack={() => setView('home')} />;
   if (view === 'student' && studentRegisterNumber) return <LabApp studentRegisterNumber={studentRegisterNumber} studentName={studentName} studentSupporter={studentSupporter} onStudentLogout={() => { setStudentRegisterNumber(null); setStudentName('Student'); setStudentSupporter(false); setView('home'); }} />;
   if (view === 'admin' && !session) return <AuthScreen />;
   if (view === 'admin' && session) return <div className="admin-page-shell"><main className="mx-auto w-full">{checking ? <div className="admin-access-check">Checking administrator access…</div> : error ? <div className="admin-access-check error">{error}</div> : <AdminUpload experiments={INITIAL_EXPERIMENTS} />}</main><footer className="admin-footer">© GPTI · IIoT Laboratory Record · Administrator</footer></div>;
